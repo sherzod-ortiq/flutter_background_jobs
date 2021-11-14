@@ -12,17 +12,96 @@ class LifeCycle extends StatefulWidget with WidgetsBindingObserver {
   final Widget child;
   LifeCycle({required this.child});
 
+  static const platform = MethodChannel('samples.flutter.dev/battery');
+  // Get battery level.
+  String _batteryLevel = 'Unknown battery level.';
+
+  Future<void> _getBatteryLevel() async {
+    String batteryLevel;
+    try {
+      final int result = await platform.invokeMethod('getBatteryLevel1');
+      batteryLevel = 'Battery level at $result % .';
+    } on PlatformException catch (e) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
+    }
+  }
+
+  Future<void> _processEngineOutput(MethodCall call) async {
+    if (call.method != 'processEngineOutput') return;
+    var line = call.arguments;
+    print(line);
+
+    int i = 0;
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      // Better observe in android studio logs not in VS code
+      print("$i////////////////////////////////////////////////////////");
+      i++;
+    });
+
+    FlutterRingtonePlayer.play(
+      android: AndroidSounds.alarm,
+      ios: IosSounds.alarm,
+      looping: true,
+      volume: 0.9,
+    );
+  }
+
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {}
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+        _getBatteryLevel();
+        return;
+      default:
+        return;
+    }
+  }
 
   @override
   _LifeCycleState createState() => _LifeCycleState();
 }
 
 class _LifeCycleState extends State<LifeCycle> {
+  // static const platform = MethodChannel('samples.flutter.dev/battery');
+  // // Get battery level.
+  // String _batteryLevel = 'Unknown battery level.';
+
+  // Future<void> _getBatteryLevel() async {
+  //   String batteryLevel;
+  //   try {
+  //     final int result = await platform.invokeMethod('getBatteryLevel1');
+  //     batteryLevel = 'Battery level at $result % .';
+  //   } on PlatformException catch (e) {
+  //     batteryLevel = "Failed to get battery level: '${e.message}'.";
+  //   }
+  //   setState(() {
+  //     _batteryLevel = batteryLevel;
+  //   });
+  // }
+
+  // Future<void> _processEngineOutput(MethodCall call) async {
+  //   if (call.method != 'processEngineOutput') return;
+  //   var line = call.arguments;
+  //   print(line);
+
+  //   int i = 0;
+  //   Timer.periodic(Duration(seconds: 1), (timer) {
+  //     print("$i////////////////////////////////////////////////////////");
+  //     i++;
+  //   });
+
+  //   FlutterRingtonePlayer.play(
+  //     android: AndroidSounds.alarm,
+  //     ios: IosSounds.alarm,
+  //     looping: true,
+  //     volume: 0.9,
+  //   );
+  // }
+
   @override
   void initState() {
     WidgetsBinding.instance!.addObserver(this.widget);
+    LifeCycle.platform.setMethodCallHandler(widget._processEngineOutput);
     super.initState();
   }
 
@@ -60,45 +139,45 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const platform = MethodChannel('samples.flutter.dev/battery');
-  // Get battery level.
-  String _batteryLevel = 'Unknown battery level.';
+  // static const platform = MethodChannel('samples.flutter.dev/battery');
+  // // Get battery level.
+  // String _batteryLevel = 'Unknown battery level.';
 
-  Future<void> _getBatteryLevel() async {
-    String batteryLevel;
-    try {
-      final int result = await platform.invokeMethod('getBatteryLevel1');
-      batteryLevel = 'Battery level at $result % .';
-    } on PlatformException catch (e) {
-      batteryLevel = "Failed to get battery level: '${e.message}'.";
-    }
-    setState(() {
-      _batteryLevel = batteryLevel;
-    });
-  }
+  // Future<void> _getBatteryLevel() async {
+  //   String batteryLevel;
+  //   try {
+  //     final int result = await platform.invokeMethod('getBatteryLevel1');
+  //     batteryLevel = 'Battery level at $result % .';
+  //   } on PlatformException catch (e) {
+  //     batteryLevel = "Failed to get battery level: '${e.message}'.";
+  //   }
+  //   setState(() {
+  //     _batteryLevel = batteryLevel;
+  //   });
+  // }
 
-  Future<void> _processEngineOutput(MethodCall call) async {
-    if (call.method != 'processEngineOutput') return;
-    var line = call.arguments;
-    print(line);
+  // Future<void> _processEngineOutput(MethodCall call) async {
+  //   if (call.method != 'processEngineOutput') return;
+  //   var line = call.arguments;
+  //   print(line);
 
-    int i = 0;
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      print("$i////////////////////////////////////////////////////////");
-      i++;
-    });
+  //   int i = 0;
+  //   Timer.periodic(Duration(seconds: 1), (timer) {
+  //     print("$i////////////////////////////////////////////////////////");
+  //     i++;
+  //   });
 
-    FlutterRingtonePlayer.play(
-      android: AndroidSounds.alarm,
-      ios: IosSounds.alarm,
-      looping: true,
-      volume: 0.9,
-    );
-  }
+  //   FlutterRingtonePlayer.play(
+  //     android: AndroidSounds.alarm,
+  //     ios: IosSounds.alarm,
+  //     looping: true,
+  //     volume: 0.9,
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
-    platform.setMethodCallHandler(_processEngineOutput);
+    // platform.setMethodCallHandler(_processEngineOutput);
 
     return Scaffold(
       appBar: AppBar(
@@ -108,11 +187,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            ElevatedButton(
-              child: Text('Get Battery Level'),
-              onPressed: _getBatteryLevel,
-            ),
-            Text(_batteryLevel),
+            // ElevatedButton(
+            //   child: Text('Get Battery Level'),
+            //   onPressed: _getBatteryLevel,
+            // ),
+            // Text(_batteryLevel),
           ],
         ),
       ),
